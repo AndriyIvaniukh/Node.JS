@@ -1,10 +1,17 @@
 const fs = require('fs');
+const {moveAllFilesToRootDir} = require('./aditionalStart');
 
+//additional part
+
+moveAllFilesToRootDir(`${__dirname}/additional`, 'additional');
+
+
+//main part
 const folderNames = ['boys', 'girls'];
 
-for (let folderName of folderNames) {
-    moveFile(folderName);
-}
+// for (let folderName of folderNames) {
+//     moveFile(folderName);
+// }
 
 function moveFile (folderName){
     fs.readdir(`./${folderName}`, ((err, stats) => {
