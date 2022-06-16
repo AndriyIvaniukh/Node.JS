@@ -1,46 +1,54 @@
 const express = require('express');
-const bp = require('body-parser');
-const fs = require('fs');
-const users = require('./dataBase/users');
-
-let file;
-fs.readFile(`./dataBase/users.json`, (err, data) => {
-    if(err){
-        console.log(err);
-        return
-    }
-    file = JSON.parse(data.toString());
-})
+const {fileService} = require("./service");
 
 
 const app = express();
-app.use(bp.json());
-app.use(bp.urlencoded({extended: true}));
+app.use(express.json());
 
-app.get('/users', ((req, res) => {
-    res.send(file);
-}));
+app.get('/users', async (req, res) => {
+    const users = await fileService.reader();
+    res.json(users);
+});
 
-app.get('/users/:id', (req, res) => {
+app.get('/users/:id', async (req, res) => {
     const id = +req.params.id;
+    const users = await fileService.reader();
 
-    if(id < 0 || isNaN(id)){
+    if (id < 0 || isNaN(id)) {
         res.status(400).send("Not valid values");
         return;
     }
-    if(id>file.length){
+    if (id > users.length) {
         res.status(404).send(`No user with id ${id}`)
         return;
     }
 
-    res.send(file[id])
+    res.json(users[id]);
 })
 
-app.put('/users', (req, res) => {
-        console.log(req.body);
-        res.send('sdad')
+app.post('/users', async (req, res) => {
+    const {id, name} = req.body;
+    const users = await fileService.reader();
+
+    for (let user of users) {
+        if(user.id === id){
+            user.name = name;
+        }
     }
-)
+    console.log(users)
+    await fileService.writer(users);
+
+    res.send('good')
+})
+
+//
+// app.put('/users', (req, res) => {
+//         console.log(req.body);
+//         res.send('sdad')
+//     }
+// )
 
 
-app.listen(5000);
+app.listen(5000, () => {
+    console.log('Started at port 5000');
+});
