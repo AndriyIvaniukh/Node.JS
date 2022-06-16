@@ -8,6 +8,6 @@ module.exports = {
         return data.toString() ? JSON.parse(data.toString()) : [];
     },
     writer: async (data)=>{
-        await fs.writeFile(path.join(process.cwd(), 'dataBase', 'users.json'), data);
+        await fs.writeFile(path.join(process.cwd(), 'dataBase', 'users.json'), JSON.stringify(data));
     }
 }
