@@ -1,8 +1,9 @@
 const fileService = require("../service/file.service");
+const User = require('../dataBase/User');
 
 async function getAll(req, res) {
     try {
-        const users = await fileService.reader();
+        const users = await User.find();
         res.json(users);
     } catch (e) {
         res.status(400).json(e.message || 'Unknown Error');
@@ -12,19 +13,9 @@ async function getAll(req, res) {
 
 async function getByID(req, res) {
     try {
-        const id = +req.params.id;
-        const users = await fileService.reader();
-
-        if (id < 0 || isNaN(id)) {
-            res.status(400).send("Not valid values");
-            return;
-        }
-        if (id >= users.length) {
-            res.status(404).send(`No user with id ${id}`)
-            return;
-        }
-
-        res.json(users[id]);
+        const {id} = req.params;
+        const user = await User.findById(id);
+        res.json(user);
 
     } catch (e) {
         res.status(400).json(e.message || 'Unknown Error');
@@ -68,21 +59,9 @@ async function updateUserByID(req, res) {
 async function createUser(req, res) {
     try {
         const {name} = req.body;
+        const user = await User.create(req.body);
 
-        if (!name || name.length < 3) {
-            res.status(400).send("Name cant be empty and must be longer them 3 symbols");
-            return;
-        }
-
-        const users = await fileService.reader();
-        const lastID = users[users.length - 1].id;
-
-        const newUser = {"id": lastID + 1, "name": name};
-        users.push(newUser)
-
-        await fileService.writer(users);
-
-        res.send('Create new user');
+        res.json(user);
     } catch (e) {
         res.status(400).json(e.message || 'Unknown Error');
     }
@@ -90,25 +69,8 @@ async function createUser(req, res) {
 
 async function deleteUserByID(req, res) {
     try {
-        const id = +req.params.id;
-
-        if (isNaN(id) || id < 0) {
-            res.status(400).send('ID must be a number and >= 0');
-            return;
-        }
-
-        const users = await fileService.reader();
-
-        const index = users.findIndex(user => user.id === id);
-
-        if (index === -1) {
-            res.status(400).send(`No user with id ${id}`);
-            return;
-        }
-
-        users.splice(index, 1);
-
-        await fileService.writer(users);
+        const id = req.params.id;
+        await User.deleteOne({_id: id})
 
         res.send(`Deleted User with id - ${id}`)
     } catch (e) {

@@ -1,6 +1,9 @@
 const express = require('express');
+const mongoose = require('mongoose');
 
 const userRouter = require('./routers/user.router');
+
+mongoose.connect('mongodb://localhost:27017/dec');
 
 const app = express();
 app.use(express.json());
