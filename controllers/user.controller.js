@@ -1,80 +1,56 @@
-const fileService = require("../service/file.service");
 const User = require('../dataBase/User');
+const {userService} = require("../service");
 
-async function getAll(req, res) {
+async function getAll(req, res, next) {
     try {
-        const users = await User.find();
+        const users = await userService.findUsers();
         res.json(users);
     } catch (e) {
-        res.status(400).json(e.message || 'Unknown Error');
+        next(e);
     }
 
 }
 
-async function getByID(req, res) {
+async function getByID(req, res, next) {
     try {
-        const {id} = req.params;
-        const user = await User.findById(id);
+        const {user} = req;
         res.json(user);
-
     } catch (e) {
-        res.status(400).json(e.message || 'Unknown Error');
+        next(e);
     }
 }
 
-async function updateUserByID(req, res) {
+async function updateUserByID(req, res, next) {
     try {
         const {id, name} = req.body;
 
-        if (!id || id < 0) {
-            res.status(400).send("wrong value ID");
-            return;
-        }
-        if (!name || name.length < 3) {
-            res.status(400).send("Name cant be empty and must be longer them 3 symbols");
-            return;
-        }
+        const user = await userService.updateOneUser();
+        user.name = name;
+        user.save();
 
-        const users = await fileService.reader();
-        let noUser = true;
-        for (let user of users) {
-            if (user.id === id) {
-                user.name = name;
-                noUser = false
-                break;
-            }
-        }
-        if (noUser) {
-            res.status(400).send('No user with this ID')
-            return;
-        }
-
-        await fileService.writer(users);
         res.send('good')
     } catch (e) {
-        res.status(400).json(e.message || 'Unknown Error');
+        next(e);
     }
 }
 
-async function createUser(req, res) {
+async function createUser(req, res, next) {
     try {
-        const {name} = req.body;
-        const user = await User.create(req.body);
-
-        res.json(user);
+        const newUser = await userService.createUser(req.body)
+        res.status(201).json(newUser);
     } catch (e) {
-        res.status(400).json(e.message || 'Unknown Error');
+        next(e);
     }
 }
 
-async function deleteUserByID(req, res) {
+async function deleteUserByID(req, res, next) {
     try {
         const id = req.params.id;
         await User.deleteOne({_id: id})
 
         res.send(`Deleted User with id - ${id}`)
     } catch (e) {
-        res.status(400).json(e.message || 'Unknown Error');
+        next(e);
     }
 }
 
