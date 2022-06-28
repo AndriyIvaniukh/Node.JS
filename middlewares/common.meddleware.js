@@ -1,5 +1,7 @@
 const {Types} = require('mongoose');
 
+const CustomError = require("../errors/CustomError");
+
 module.exports = {
     isIdValid: (req, res, next) => {
         try {

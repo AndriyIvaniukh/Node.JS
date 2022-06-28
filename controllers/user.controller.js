@@ -1,4 +1,3 @@
-const User = require('../dataBase/User');
 const {userService} = require("../service");
 
 async function getAll(req, res, next) {
@@ -22,13 +21,9 @@ async function getByID(req, res, next) {
 
 async function updateUserByID(req, res, next) {
     try {
-        const {id, name} = req.body;
-
-        const user = await userService.updateOneUser();
-        user.name = name;
-        user.save();
-
-        res.send('good')
+        const {id} = req.params;
+        const updatedUser = await userService.updateOneUser({_id: id}, req.body);
+        res.status(201).send(updatedUser);
     } catch (e) {
         next(e);
     }
@@ -45,10 +40,9 @@ async function createUser(req, res, next) {
 
 async function deleteUserByID(req, res, next) {
     try {
-        const id = req.params.id;
-        await User.deleteOne({_id: id})
-
-        res.send(`Deleted User with id - ${id}`)
+        const {id} = req.params;
+        await userService.deleteOneUser({_id: id});
+        res.status(201).json(`Deleted User with id - ${id}`);
     } catch (e) {
         next(e);
     }

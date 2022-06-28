@@ -22,7 +22,7 @@ function isUserValidForCreate(req, res, next) {
         }
 
         if (password.length < 5) {
-            throw new CustomError('Password should include at list 5 symbols', 403)
+            return next(new CustomError('Password should include at list 5 symbols', 403));
         }
 
         next();
@@ -31,21 +31,21 @@ function isUserValidForCreate(req, res, next) {
     }
 }
 
-function checkUserOnUpdate(req, res, next) {
+function isUserValidForUpdate(req, res, next) {
     try {
-        const {id, name} = req.body;
+        const {email = '', name = '', age = 0, password = ''} = req.body;
 
-        if (id.length !== 24) {
-            throw new CustomError('Unpossible id', 400);
+        if (age && !Number.isInteger(age)) {
+            return next(new CustomError('Set valid age', 400));
         }
 
-        if (name.length < 3) {
-            throw new CustomError('Name must be longer then 3 symbols', 400);
+        if (name && name.length < 3) {
+            return next(new CustomError('Set valid name', 400));
         }
 
         next();
     } catch (e) {
-        next(e)
+        next(e);
     }
 }
 
@@ -66,9 +66,27 @@ async function isUserPresent(req, res, next) {
     }
 }
 
+async function isUserUniq(req, res, next) {
+    try {
+        const {email} = req.body;
+
+        const user = await userService.findOneUser({email});
+
+        if (user) {
+            return next(new CustomError(`User with email ${email} is exist`, 409));
+        }
+
+        req.user = user;
+        next();
+    } catch (e) {
+        next(e);
+    }
+}
+
 
 module.exports = {
     isUserPresent,
     isUserValidForCreate,
-    checkUserOnUpdate
+    isUserValidForUpdate,
+    isUserUniq
 }

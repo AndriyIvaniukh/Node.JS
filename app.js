@@ -1,9 +1,10 @@
 const express = require('express');
 const mongoose = require('mongoose');
 
-const userRouter = require('./routers/user.router');
+const {userRouter} = require('./routers');
+const {configs} = require("./config");
 
-mongoose.connect('mongodb://localhost:27017/dec');
+mongoose.connect(configs.MONGO_URL);
 
 const app = express();
 app.use(express.json());
@@ -24,8 +25,8 @@ app.use((err, req, res, next) => {
         })
 })
 
-app.listen(5000, () => {
-    console.log('Started at port 5000');
+app.listen(configs.PORT, () => {
+    console.log(`Started at port ${configs.PORT}`);
 });
 
 
