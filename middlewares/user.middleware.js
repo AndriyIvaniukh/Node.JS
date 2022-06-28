@@ -33,7 +33,7 @@ function isUserValidForCreate(req, res, next) {
 
 function isUserValidForUpdate(req, res, next) {
     try {
-        const {email = '', name = '', age = 0, password = ''} = req.body;
+        const {name, age} = req.body;
 
         if (age && !Number.isInteger(age)) {
             return next(new CustomError('Set valid age', 400));
@@ -43,6 +43,7 @@ function isUserValidForUpdate(req, res, next) {
             return next(new CustomError('Set valid name', 400));
         }
 
+        req.dataForUpdate = {name, age};
         next();
     } catch (e) {
         next(e);

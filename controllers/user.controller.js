@@ -22,7 +22,7 @@ async function getByID(req, res, next) {
 async function updateUserByID(req, res, next) {
     try {
         const {id} = req.params;
-        const updatedUser = await userService.updateOneUser({_id: id}, req.body);
+        const updatedUser = await userService.updateOneUser({_id: id}, req.dataForUpdate);
         res.status(201).send(updatedUser);
     } catch (e) {
         next(e);
