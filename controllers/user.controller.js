@@ -1,4 +1,4 @@
-const {userService} = require("../service");
+const {userService, passwordService} = require("../service");
 
 async function getAll(req, res, next) {
     try {
@@ -22,7 +22,7 @@ async function getByID(req, res, next) {
 async function updateUserByID(req, res, next) {
     try {
         const {id} = req.params;
-        const updatedUser = await userService.updateOneUser({_id: id}, req.dataForUpdate);
+        const updatedUser = await userService.updateOneUser({_id: id}, req.body);
         res.status(201).send(updatedUser);
     } catch (e) {
         next(e);
@@ -31,7 +31,8 @@ async function updateUserByID(req, res, next) {
 
 async function createUser(req, res, next) {
     try {
-        const newUser = await userService.createUser(req.body)
+        const hashedPassword = await passwordService.hashPassword(req.body.password);
+        const newUser = await userService.createUser({...req.body, password: hashedPassword})
         res.status(201).json(newUser);
     } catch (e) {
         next(e);
