@@ -1,7 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 
-const {userRouter} = require('./routers');
+const {userRouter, authRouter} = require('./routers');
 const {configs} = require("./config");
 
 mongoose.connect(configs.MONGO_URL);
@@ -10,6 +10,7 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({extended: true}))
 
+app.use('/auth', authRouter);
 app.use('/users', userRouter);
 
 app.use('*', (req, res) => {

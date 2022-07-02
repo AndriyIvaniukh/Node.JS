@@ -4,9 +4,9 @@ const {userValidator, userQueryValidator} = require("../validators");
 
 function isUserValidForCreate(req, res, next) {
     try {
-        const {error,value} =  userValidator.newUserValidator.validate(req.body);
+        const {error, value} = userValidator.newUserValidator.validate(req.body);
 
-        if(error){
+        if (error) {
             return next(new CustomError(error.details[0].message, 400))
         }
 
@@ -19,9 +19,9 @@ function isUserValidForCreate(req, res, next) {
 
 function isUserValidForUpdate(req, res, next) {
     try {
-        const {error,value} = userValidator.updateUserValidator.validate(req.body);
+        const {error, value} = userValidator.updateUserValidator.validate(req.body);
 
-        if (error){
+        if (error) {
             return next(new CustomError(error.details[0].message, 400));
         }
 
@@ -39,10 +39,25 @@ async function isUserPresent(req, res, next) {
         const user = await userService.findOneUser({_id: id});
 
         if (!user) {
-            return next(new CustomError('User not found', 400));
+            return next(new CustomError('User not found', 404));
         }
 
         req.user = user;
+        next();
+    } catch (e) {
+        next(e);
+    }
+}
+
+async function isUserPresentByEmail(req, res, next) {
+    try {
+        const userByEmail = await userService.findOneUser({email: req.body.email});
+
+        if (!userByEmail) {
+            return next(new CustomError('User not found', 404));
+        }
+
+        req.user = userByEmail;
         next();
     } catch (e) {
         next(e);
@@ -66,23 +81,24 @@ async function isUserUniq(req, res, next) {
     }
 }
 
-async function isUserQueryValid (req,res,next) {
-    try{
-        const {error,value} = userQueryValidator.findAll.validate(req.query);
+async function isUserQueryValid(req, res, next) {
+    try {
+        const {error, value} = userQueryValidator.findAll.validate(req.query);
 
-        if(error){
-            return next(new CustomError(error.details[0].message,400));
+        if (error) {
+            return next(new CustomError(error.details[0].message, 400));
         }
 
         req.query = value;
         next();
-    }catch (e) {
+    } catch (e) {
         next(e)
     }
 }
 
 module.exports = {
     isUserPresent,
+    isUserPresentByEmail,
     isUserValidForCreate,
     isUserValidForUpdate,
     isUserQueryValid,
