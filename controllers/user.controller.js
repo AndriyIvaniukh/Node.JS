@@ -3,7 +3,7 @@ const {userPresenter} = require("../presenters/user.presenter");
 
 async function getAll(req, res, next) {
     try {
-        const users = await userService.findUsers().exec();
+        const users = await userService.findUsers(req.query).exec();
         const usersForResponse = users.map(user => userPresenter(user));
         res.json(usersForResponse);
     } catch (e) {

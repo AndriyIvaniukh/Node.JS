@@ -1,6 +1,6 @@
 const CustomError = require("../errors/CustomError");
 const {userService} = require("../service");
-const {userValidator} = require("../validators");
+const {userValidator, userQueryValidator} = require("../validators");
 
 function isUserValidForCreate(req, res, next) {
     try {
@@ -66,10 +66,25 @@ async function isUserUniq(req, res, next) {
     }
 }
 
+async function isUserQueryValid (req,res,next) {
+    try{
+        const {error,value} = userQueryValidator.findAll.validate(req.query);
+
+        if(error){
+            return next(new CustomError(error.details[0].message,400));
+        }
+
+        req.query = value;
+        next();
+    }catch (e) {
+        next(e)
+    }
+}
 
 module.exports = {
     isUserPresent,
     isUserValidForCreate,
     isUserValidForUpdate,
+    isUserQueryValid,
     isUserUniq
 }
