@@ -1,7 +1,6 @@
 const customError = require('../errors/CustomError');
-const {checkAccessToken, checkRefreshToken} = require("../service/token.service");
+const {verifyToken} = require("../service/token.service");
 const {OAuth} = require("../dataBase");
-const {tokenService} = require("../service");
 
 module.exports = {
     checkAccessToken: async (req,res,next) => {
@@ -10,7 +9,7 @@ module.exports = {
             if(!authToken){
                 return next(new customError('No token', 401))
             }
-            checkAccessToken(authToken);
+            verifyToken(authToken);
 
             const tokenInfo = OAuth.findOne({access_token: authToken}).populate('userId');
 
@@ -32,17 +31,15 @@ module.exports = {
                 return next(new customError('No token', 401));
             }
 
-            checkRefreshToken(authToken)
+            verifyToken(authToken, 'refresh')
 
-            const tokenInfo = await OAuth.findOne({refresh_token: authToken}).populate('userId');
+            const tokenInfo = await OAuth.findOne({refresh_token: authToken});
 
             if(!tokenInfo){
                 return next(new customError('Token not valid', 401))
             }
 
-            req.user = tokenInfo.userId;
-            await tokenService.deleteTokensByID(tokenInfo._id);
-
+            req.tokenInfo = tokenInfo;
             next()
         }catch (e){
             next(e)

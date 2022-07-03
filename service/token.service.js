@@ -14,19 +14,16 @@ function generateAuthToken(payload = {}) {
     }
 }
 
-function checkAccessToken(access_token = '') {
+function verifyToken(access_token = '', tokenType = 'access') {
     try {
-        return jwt.verify(access_token, ACCESS_TOKEN_SECRET);
+        let secret;
+
+        if(tokenType === 'access'){secret = ACCESS_TOKEN_SECRET};
+        if(tokenType === 'refresh'){secret = REFRESH_TOKEN_SECRET};
+
+        return jwt.verify(access_token, secret);
     } catch (e) {
         throw new customError("Token is not valid", 401);
-    }
-}
-
-function checkRefreshToken(refresh_token = ''){
-    try {
-        return jwt.verify(refresh_token, REFRESH_TOKEN_SECRET);
-    }catch (e) {
-        throw new customError('Token is not valid', 401)
     }
 }
 
@@ -35,8 +32,7 @@ function deleteTokensByID(params){
 }
 
 module.exports = {
-    checkAccessToken,
-    checkRefreshToken,
+    verifyToken,
     generateAuthToken,
     deleteTokensByID,
 }
