@@ -19,6 +19,7 @@ userRouter.put('/:id',
     commonMiddleware.isIdValid,
     userMiddleware.isUserValidForUpdate,
     userMiddleware.isUserPresent,
+    authMiddleware.checkAccessToken,
     userController.updateUserByID);
 userRouter.delete('/:id',
     commonMiddleware.isIdValid,

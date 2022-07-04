@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const customError = require('../errors/CustomError');
 const {ACCESS_TOKEN_SECRET, REFRESH_TOKEN_SECRET} = require("../config/configs");
 const {OAuth} = require("../dataBase");
+const {tokenTypeEnum} = require("../enums");
 
 function generateAuthToken(payload = {}) {
     const access_token = jwt.sign(payload, ACCESS_TOKEN_SECRET, {expiresIn: '15m'});
@@ -14,12 +15,12 @@ function generateAuthToken(payload = {}) {
     }
 }
 
-function verifyToken(access_token = '', tokenType = 'access') {
+function verifyToken(access_token = '', tokenType = tokenTypeEnum.ACCESS) {
     try {
         let secret;
 
-        if(tokenType === 'access'){secret = ACCESS_TOKEN_SECRET};
-        if(tokenType === 'refresh'){secret = REFRESH_TOKEN_SECRET};
+        if(tokenType === tokenTypeEnum.ACCESS){secret = ACCESS_TOKEN_SECRET};
+        if(tokenType === tokenTypeEnum.REFRESH){secret = REFRESH_TOKEN_SECRET};
 
         return jwt.verify(access_token, secret);
     } catch (e) {

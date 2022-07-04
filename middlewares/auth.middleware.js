@@ -1,11 +1,14 @@
 const customError = require('../errors/CustomError');
 const {verifyToken} = require("../service/token.service");
 const {OAuth} = require("../dataBase");
+const {authValidator} = require("../validators");
+const {tokenTypeEnum} = require("../enums");
+const {constants} = require("../config");
 
 module.exports = {
     checkAccessToken: async (req,res,next) => {
         try{
-            const authToken = req.get('Authorization');
+            const authToken = req.get(constants.AUTHORIZATION);
             if(!authToken){
                 return next(new customError('No token', 401))
             }
@@ -25,13 +28,13 @@ module.exports = {
 
     checkRefreshToken: async (req,res,next) => {
         try{
-            const authToken = req.get('Authorization');
+            const authToken = req.get(constants.AUTHORIZATION);
 
             if(!authToken){
                 return next(new customError('No token', 401));
             }
 
-            verifyToken(authToken, 'refresh')
+            verifyToken(authToken, tokenTypeEnum.REFRESH)
 
             const tokenInfo = await OAuth.findOne({refresh_token: authToken});
 
@@ -44,6 +47,21 @@ module.exports = {
         }catch (e){
             next(e)
         }
-    }
+    },
+
+    isLoginBodyValid: async (req,res,next) =>{
+        try{
+            const {error, value} = authValidator.login.validate(req.body);
+
+            if(error){
+                return next(new customError("Email or password is wrong", 400))
+            }
+
+            req.body = value;
+            next()
+        }catch (e) {
+            next(e)
+        }
+    },
 
 }
