@@ -1,14 +1,17 @@
 const {generateAuthToken} = require("../service/token.service");
-const {passwordService, tokenService} = require("../service");
+const {passwordService, tokenService, emailService} = require("../service");
 const {userPresenter} = require("../presenters/user.presenter");
 const {OAuth} = require("../dataBase");
 const {constants} = require("../config");
+const {WELCOME} = require("../enums/email-action.enum");
 
 module.exports = {
     login: async (req, res, next) => {
         try {
-            const {password: HashPassword, _id} = req.user
+            const {password: HashPassword, _id, name}= req.user
             const {password} = req.body;
+
+            await emailService.sendMail('andriyivaniukh@gmail.com', WELCOME, {userName: name});
 
             await passwordService.comparePassword(password, HashPassword);
 

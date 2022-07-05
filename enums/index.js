@@ -1,3 +1,4 @@
 module.exports = {
-    tokenTypeEnum: require('./tokenTypes.enum'),
+    tokenTypeEnum: require('./token-types.enum'),
+    emailActionEnum: require('./email-action.enum')
 }
