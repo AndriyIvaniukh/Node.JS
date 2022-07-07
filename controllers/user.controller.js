@@ -1,5 +1,6 @@
-const {userService, passwordService} = require("../service");
+const {userService, passwordService, emailService} = require("../service");
 const {userPresenter} = require("../presenters/user.presenter");
+const {emailActionEnum} = require("../enums");
 
 async function getAll(req, res, next) {
     try {
@@ -35,8 +36,12 @@ async function updateUserByID(req, res, next) {
 
 async function createUser(req, res, next) {
     try {
-        const hashedPassword = await passwordService.hashPassword(req.body.password);
+        const {email, password, name} = req.body;
+        const hashedPassword = await passwordService.hashPassword(password);
         const newUser = await userService.createUser({...req.body, password: hashedPassword})
+
+        await emailService.sendMail(email, emailActionEnum.WELCOME, {name})
+
         const userForResponse = userPresenter(newUser);
         res.status(201).json(userForResponse);
     } catch (e) {

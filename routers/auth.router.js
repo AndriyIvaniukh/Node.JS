@@ -13,5 +13,12 @@ authRouter.post('/refresh',
 authRouter.post('/logout',
     authMiddleware.checkAccessToken,
     authController.logout);
+authRouter.post('/logoutAllDevice',
+    authMiddleware.checkAccessToken,
+    authController.logoutAllDevice);
+authRouter.post('/forgotPassword',
+    authMiddleware.isEmailValid,
+    userMiddleware.isUserPresentByEmail,
+    authController.forgotPassword);
 
 module.exports = authRouter;

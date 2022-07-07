@@ -9,5 +9,11 @@ module.exports = {
     [emailActionEnum.FORGOT_PASSWORD]: {
         subject: 'Opps looks like you forgot password',
         template: 'forgot-password'
-    }
+    },
+
+    [emailActionEnum.LOGOUT]: {
+        subject: 'You was logout',
+        template: 'logout'
+    },
+
 }

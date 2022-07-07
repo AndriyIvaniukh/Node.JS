@@ -5,5 +5,7 @@ module.exports = {
     REFRESH_TOKEN_SECRET: process.env.REFRESH_TOKEN_SECRET  || 'qwe',
 
     NO_REPLY_EMAIL: process.env.NO_REPLY_EMAIL || 'email@email.com',
-    NO_REPLY_EMAIL_PASSWORD: process.env.NO_REPLY_EMAIL_PASSWORD || '12345'
+    NO_REPLY_EMAIL_PASSWORD: process.env.NO_REPLY_EMAIL_PASSWORD || '12345',
+
+    FRONTEND_URL:process.env.FRONTEND_URL || 'google.com'
 };
