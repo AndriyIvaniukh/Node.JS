@@ -1,5 +1,5 @@
 const {Schema, model} = require('mongoose');
-const {comparePassword} = require("../service/password.service");
+const {comparePassword, hashPassword} = require("../service/password.service");
 
 const UserSchema = new Schema({
     name:{
@@ -32,7 +32,7 @@ UserSchema.methods = {
 
 UserSchema.statics = {
     createWithHashPassword: async function (userToSave) {
-        const hashedPassword = await passwordService.hashPassword(userToSave.password);
+        const hashedPassword = await hashPassword(userToSave.password);
 
         return this.create({...userToSave, password: hashedPassword})
     }
