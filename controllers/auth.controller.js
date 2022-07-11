@@ -1,9 +1,11 @@
 const {generateAuthToken} = require("../service/token.service");
 const {passwordService, tokenService, emailService} = require("../service");
 const {userPresenter} = require("../presenters/user.presenter");
-const {OAuth} = require("../dataBase");
-const {WELCOME} = require("../enums/email-action.enum");
+const {OAuth, ActionTokens, Users} = require("../dataBase");
+const {WELCOME, FORGOT_PASSWORD} = require("../enums/email-action.enum");
 const {emailActionEnum} = require("../enums");
+const {ACTION_TOKEN_SECRET} = require("../config/configs");
+const {hashPassword} = require("../service/password.service");
 
 module.exports = {
     login: async (req, res, next) => {
@@ -13,7 +15,8 @@ module.exports = {
 
             await emailService.sendMail('andriyivaniukh@gmail.com', WELCOME, {name});
 
-            await passwordService.comparePassword(password, HashPassword);
+            await req.user.comparePasswords(password);
+            // await passwordService.comparePassword(password, HashPassword);
 
             const userForPresents = userPresenter(req.user);
             const tokens = generateAuthToken();
@@ -78,13 +81,32 @@ module.exports = {
     },
 
     forgotPassword: async (req, res, next) => {
-        try{
+        try {
             const {email, name, _id} = req.user;
 
             await OAuth.deleteMany({userId: _id});
-            await emailService.sendMail(email, emailActionEnum.FORGOT_PASSWORD, {name});
+
+            const actionToken = await tokenService.generateActionToken(FORGOT_PASSWORD);
+
+            await ActionTokens.create({userId: _id, actionToken, actionType: FORGOT_PASSWORD});
+
+            await emailService.sendMail(email, emailActionEnum.FORGOT_PASSWORD, {name, actionToken});
 
             res.status(201).json('Email for reset password was sanded')
+        } catch (e) {
+            next(e)
+        }
+    },
+
+    setNewPassword: async (req,res,next)=>{
+        try{
+            const {password, user} = req.body;
+
+            const hashedPassword = await hashPassword(password);
+
+            await Users.updateOne({_id: user.userId}, {password: hashedPassword});
+
+            res.status(201).json('Password was changed')
         }catch (e) {
             next(e)
         }

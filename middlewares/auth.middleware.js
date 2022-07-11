@@ -1,6 +1,6 @@
 const customError = require('../errors/CustomError');
 const {verifyToken} = require("../service/token.service");
-const {OAuth} = require("../dataBase");
+const {OAuth, ActionTokens} = require("../dataBase");
 const {authValidator} = require("../validators");
 const {tokenTypeEnum} = require("../enums");
 const {constants} = require("../config");
@@ -65,6 +65,31 @@ module.exports = {
         }
     },
 
+    checkActionToken: (actionType) =>   async (req, res, next) => {
+        try {
+            const token = req.get(constants.AUTHORIZATION);
+
+            if (!token) {
+                return next(new customError('No token', 401));
+            }
+
+            verifyToken(token, actionType)
+
+            const user = await ActionTokens.findOne({token}).populate('userId');
+
+            if (!user) {
+                return next(new customError('Token not valid', 401))
+            }
+
+            await ActionTokens.deleteOne({token});
+
+            req.user = user;
+            next()
+        } catch (e) {
+            next(e)
+        }
+    },
+
     isEmailValid: async (req, res, next) => {
         try{
             const {error,value} = authValidator.resetPassword.validate(req.body);
@@ -75,6 +100,21 @@ module.exports = {
 
             req.body = value;
             next()
+        }catch (e) {
+            next(e);
+        }
+    },
+
+    isPasswordValid: async (req, res, next) => {
+        try{
+            const {error,value} = authValidator.setPassword.validate(req.body);
+
+            if(error){
+                return next(new customError('Password not walid', 400));
+            }
+
+            req.body = {user: req.user, password: value.password};
+            next();
         }catch (e) {
             next(e);
         }

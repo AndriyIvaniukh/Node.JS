@@ -1,6 +1,7 @@
 const {userService, passwordService, emailService} = require("../service");
 const {userPresenter} = require("../presenters/user.presenter");
 const {emailActionEnum} = require("../enums");
+const {Users} = require("../dataBase");
 
 async function getAll(req, res, next) {
     try {
@@ -37,8 +38,10 @@ async function updateUserByID(req, res, next) {
 async function createUser(req, res, next) {
     try {
         const {email, password, name} = req.body;
-        const hashedPassword = await passwordService.hashPassword(password);
-        const newUser = await userService.createUser({...req.body, password: hashedPassword})
+        // const hashedPassword = await passwordService.hashPassword(password);
+        // const newUser = await userService.createUser({...req.body, password: hashedPassword})
+
+        const newUser = await Users.createWithHashPassword(req.body);
 
         await emailService.sendMail(email, emailActionEnum.WELCOME, {name})
 
