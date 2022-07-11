@@ -17,7 +17,8 @@
     "nodemailer": "^6.7.6",
     "nodemailer-express-handlebars": "^5.0.0",
     "nodemon": "^2.0.19",
-    "pug": "^3.0.2"
+    "pug": "^3.0.2",
+    "twilio": "^3.78.0"
   },
   "devDependencies": {
     "@types/nodemailer": "^6.4.4"
