@@ -1,5 +1,6 @@
 const path = require("path");
 const express = require('express');
+const expressFifeUpload = require('express-fileupload');
 const mongoose = require('mongoose');
 require('dotenv').config({path:path.join(process.cwd(), 'environments', `${process.env.MODE}.env`)});
 
@@ -12,6 +13,7 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({extended: true}))
 
+app.use(expressFifeUpload());
 app.use('/auth', authRouter);
 app.use('/users', userRouter);
 

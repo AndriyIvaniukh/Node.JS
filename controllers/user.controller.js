@@ -1,8 +1,10 @@
-const {userService, emailService, smsService} = require("../service");
+const {userService, emailService, smsService, awsService} = require("../service");
 const {userPresenter} = require("../presenters/user.presenter");
 const {emailActionEnum, smsActionEnum} = require("../enums");
 const {Users} = require("../dataBase");
 const {smsTemplateBuilder} = require("../common");
+const {uploadFine} = require("../service/aws.service");
+const {findUsers} = require("../service/user.service");
 
 async function getAll(req, res, next) {
     try {
@@ -28,7 +30,16 @@ async function getByID(req, res, next) {
 async function updateUserByID(req, res, next) {
     try {
         const {id} = req.params;
-        const updatedUser = await userService.updateOneUser({_id: id}, req.body);
+
+        const user = await userService.findOneUser({_id: id})
+
+        // Delete avatar from AWS
+        const fileName = user.avatar.split('/').pop();
+        await awsService.deleteFile(fileName, 'user', user._id);
+
+        const bodyForUpdate = {...req.body, avatar: ''};
+        const updatedUser = await userService.updateOneUser({_id: id}, bodyForUpdate, {new: true});
+
         const userForResponse = userPresenter(updatedUser);
         res.status(201).send(userForResponse);
     } catch (e) {
@@ -39,10 +50,15 @@ async function updateUserByID(req, res, next) {
 async function createUser(req, res, next) {
     try {
         const {email, password, name, phone} = req.body;
+
         // const hashedPassword = await passwordService.hashPassword(password);
         // const newUser = await userService.createUser({...req.body, password: hashedPassword})
 
-        const newUser = await Users.createWithHashPassword(req.body);
+        let newUser = await Users.createWithHashPassword(req.body);
+
+        const {Location} = await uploadFine(req.files.avatar, 'user', newUser._id);
+
+        const newUserWithAvatar = await Users.findOneAndUpdate({_id: newUser._id}, {avatar: Location}, {new: true});
 
         await emailService.sendMail(email, emailActionEnum.WELCOME, {name})
 
@@ -50,7 +66,7 @@ async function createUser(req, res, next) {
         // await smsService.sendSMS('+380982759659', message);
         await smsService.sendSMS(phone, message);
 
-        const userForResponse = userPresenter(newUser);
+        const userForResponse = userPresenter(newUserWithAvatar);
         res.status(201).json(userForResponse);
     } catch (e) {
         next(e);

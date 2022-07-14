@@ -5,6 +5,7 @@ module.exports = {
             name: user.name,
             email: user.email,
             age: user.age,
+            avatar: user.avatar,
             createdAt: user.createdAt,
             updatedAt: user.updatedAt
         }
